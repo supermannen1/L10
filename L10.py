@@ -1,8 +1,12 @@
 from hashtable import Hashtable
 from linkedQFile import LinkedQ
+from molgrafik import *
+from sys import stdin
 import re
 
-class Ruta:
+class Syntaxfel(Exception):
+    pass
+class Ruta2:
     def __init__(self, atom="( )", num=1):
         self.atom = atom
         self.num = num
@@ -11,17 +15,21 @@ class Ruta:
 
 def readformel(q,HashadAtomtabel):
 
-    rot = Ruta()
-    rot = readmol(q,HashadAtomtabel)
+    träd = Ruta()
+    träd = readmol(q,HashadAtomtabel)
     if q.size() != 0:
         raise Syntaxfel('Felaktig gruppstart vid radslutet ')
-    return rot
+    return träd
 
 def readmol(q,HashadAtomtabel):
-    readgroup(q,HashadAtomtabel)
+
+    mol = Ruta()
+    mol = readgroup(q,HashadAtomtabel)
     if (q.peek() == None ) or (q.peek().value == ')'):
-        return
-    readmol(q,HashadAtomtabel)
+        return mol
+    mol.next = readmol(q,HashadAtomtabel)
+    return mol
+
 
 def readgroup(q,HashadAtomtabel):
 
@@ -31,18 +39,18 @@ def readgroup(q,HashadAtomtabel):
 
     if (q.peek().value == '('):
         q.dequeue()
-        readmol(q, HashadAtomtabel)
+        rutan.down = readmol(q, HashadAtomtabel)
         if (q.peek()==None) or (q.peek().value != ')'):
             raise Syntaxfel('Saknad högerparentes vid radslutet ')
         q.dequeue()
-        readnum(q)
-        return
+        rutan.num = readnum(q)
+        return rutan
 
     if (re.search("[a-zA-Z]",q.peek().value)):
-        readAtom(q,HashadAtomtabel)
+        rutan.atom = readAtom(q,HashadAtomtabel)
         if q.peek() != None and q.peek().value.isdigit():
-            readnum(q)
-        return
+            rutan.num = readnum(q)
+        return rutan
     
     raise Syntaxfel('Felaktig gruppstart vid radslutet ')
     
@@ -97,8 +105,7 @@ def readnum(q):
 def kollaSyntaxMolekylFormel(q,HashadAtomtabel):
 
     try:                                  
-        readformel(q,HashadAtomtabel)                                
-        return "Formeln är syntaktiskt korrekt "     
+        return readformel(q,HashadAtomtabel)                      
     except Syntaxfel as fel:                            
         return str(fel) + str(q.toString()) 
 
@@ -251,3 +258,24 @@ def lagraHashtabell(atomlista):
     for atom in atomlista:
         hashtabell.store(atom.namn, atom)
     return hashtabell
+
+def main():
+
+    atomLista = skapaAtomlista()
+    HashadAtomtabel = lagraHashtabell(atomLista)
+    mol = Ruta()
+    q = LinkedQ()
+    apa = True
+    while apa:
+        molekylformeler = input("")
+        if molekylformeler == '#':
+            break
+        else:
+            for j in range(len(molekylformeler)):
+                q.enqueue(molekylformeler[j])
+            mol = kollaSyntaxMolekylFormel(q,HashadAtomtabel)
+            mg = Molgrafik()
+            mg.show(mol)
+
+if __name__ == "__main__":
+    main()
