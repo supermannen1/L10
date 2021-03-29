@@ -120,7 +120,7 @@ def weight(mol):
             vikt = vikt*mol.num
         vikt += weight(mol.next)
         if mol.atom != "( )":
-            vikt += (mol.atom.vikt * mol.num)
+            vikt += (mol.atom.getvikt()* mol.num)
     return vikt
 
 #Class Atom från samt atom lista från labb 7
@@ -274,23 +274,24 @@ def main():
 
     atomLista = skapaAtomlista()
     HashadAtomtabel = lagraHashtabell(atomLista)
-    mol = Ruta2()
-    q = LinkedQ()
-    apa = True
-    while apa:
+    loop = True
+    while loop:
+
+        mol = Ruta2()
+        q = LinkedQ()
         molekylformeler = input("")
         if molekylformeler == '#':
             break
         else:
             for j in range(len(molekylformeler)):
                 q.enqueue(molekylformeler[j])
-                mol = kollaSyntaxMolekylFormel(q,HashadAtomtabel)
-                if isinstance(mol, Atom):
-                    print(mol)
-                    mg = Molgrafik()
-                    mg.show(mol)
-                else:
-                    print(mol)
+            mol = kollaSyntaxMolekylFormel(q,HashadAtomtabel)
+            if isinstance(mol, Ruta2):
+                print(weight(mol))
+                mg = Molgrafik()
+                mg.show(mol)
+            else:
+                print(mol)
 
 
 if __name__ == "__main__":
