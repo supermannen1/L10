@@ -39,11 +39,11 @@ class Hashtable:
         currentNode = self.table[self.hashfunction(key)] # Hämtar noden med specifika nyckeln
         while currentNode != None:                       # Hämtar data från noden
             if currentNode.key == key:
-               return True
+                return currentNode.data
             else:
                 currentNode = currentNode.next
 
-        return False                                  # Raise exception om key är inte tillåten
+        return False                                 # Raise exception om key är inte tillåten
 
 
     def hashfunction(self, key):

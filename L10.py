@@ -15,7 +15,7 @@ class Ruta2:
 
 def readformel(q,HashadAtomtabel):
 
-    träd = Ruta()
+    träd = Ruta2()
     träd = readmol(q,HashadAtomtabel)
     if q.size() != 0:
         raise Syntaxfel('Felaktig gruppstart vid radslutet ')
@@ -23,7 +23,7 @@ def readformel(q,HashadAtomtabel):
 
 def readmol(q,HashadAtomtabel):
 
-    mol = Ruta()
+    mol = Ruta2()
     mol = readgroup(q,HashadAtomtabel)
     if (q.peek() == None ) or (q.peek().value == ')'):
         return mol
@@ -33,7 +33,7 @@ def readmol(q,HashadAtomtabel):
 
 def readgroup(q,HashadAtomtabel):
 
-    rutan = Ruta()
+    rutan = Ruta2()
     if (q.peek() == None):
         raise Syntaxfel('Felaktig gruppstart vid radslutet ')
 
@@ -56,15 +56,17 @@ def readgroup(q,HashadAtomtabel):
     
 def readAtom(q,HashadAtomtabel):
 
-    atom = readLETTER(q)
+    atom = Atom()
+    atomnamn = readLETTER(q)
     
     if (q.peek() != None) and re.search("[a-z]",q.peek().value):
-        atom += readletter(q)
-        if not HashadAtomtabel.search(atom):
+        atomnamn += readletter(q)
+        atom = HashadAtomtabel.search(atomnamn)
+        if atom == False:
             raise Syntaxfel('Okänd atom vid radslutet ')
         return atom
-
-    if not HashadAtomtabel.search(atom):
+    atom = HashadAtomtabel.search(atomnamn)
+    if atom == False:
         raise Syntaxfel('Okänd atom vid radslutet ')
     return atom
 
@@ -109,13 +111,22 @@ def kollaSyntaxMolekylFormel(q,HashadAtomtabel):
     except Syntaxfel as fel:                            
         return str(fel) + str(q.toString()) 
 
+def weight(mol):
 
+    vikt = 0
+    if mol != None:
+        vikt = weight(mol.down)
+        if mol.atom == "( )":
+            vikt = vikt*mol.num
+        vikt += weight(mol.next)
+        if mol.atom != "( )":
+            vikt += (mol.atom.vikt * mol.num)
+    return vikt
 
-
-# Class Atom från samt atom lista från labb 7
+#Class Atom från samt atom lista från labb 7
 class Atom:
 
-    def __init__(self, namn, vikt):
+    def __init__(self, namn = 0, vikt = 0):
         self.namn = namn
         self.vikt = vikt
 
@@ -263,7 +274,7 @@ def main():
 
     atomLista = skapaAtomlista()
     HashadAtomtabel = lagraHashtabell(atomLista)
-    mol = Ruta()
+    mol = Ruta2()
     q = LinkedQ()
     apa = True
     while apa:
@@ -273,9 +284,14 @@ def main():
         else:
             for j in range(len(molekylformeler)):
                 q.enqueue(molekylformeler[j])
-            mol = kollaSyntaxMolekylFormel(q,HashadAtomtabel)
-            mg = Molgrafik()
-            mg.show(mol)
+                mol = kollaSyntaxMolekylFormel(q,HashadAtomtabel)
+                if isinstance(mol, Atom):
+                    print(mol)
+                    mg = Molgrafik()
+                    mg.show(mol)
+                else:
+                    print(mol)
+
 
 if __name__ == "__main__":
     main()
