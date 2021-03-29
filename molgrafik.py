@@ -21,7 +21,7 @@ else:
 
 
 class Ruta:
-    def __init__(self, atom = "()", num = 1):
+    def __init__(self, atom = "( )", num = 1):
         self.atom = atom
         self.num = num
         self.next=None
@@ -75,7 +75,10 @@ class Molgrafik:
         rest=self.ram(master,LEFT)
         uppruta=self.ram(storruta,TOP)
         nerruta=self.ram(storruta,TOP)
-        self.atomruta(uppruta,p.atom,p.num)
+        if p.atom != '( )':
+            self.atomruta(uppruta,p.atom.getnamn(),p.num)
+        else:
+            self.atomruta(uppruta,p.atom,p.num)
         if p.down:
             self.stolpe(nerruta)
             self.picture(nerruta,p.down)
